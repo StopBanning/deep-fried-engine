@@ -1,0 +1,17 @@
+# Your real holdings never go in git.
+portfolio.yaml
+*.local.yaml
+.env
+
+# Fetched bars and generated reports.
+data/
+reports/
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+build/

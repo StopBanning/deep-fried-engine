@@ -1,0 +1,35 @@
+name: Daily Downside
+
+on:
+  schedule:
+    - cron: "30 23 * * 1-5"   # 6:30 pm New York in winter (7:30 pm in summer); after the 6 pm bar cutoff
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install
+        run: pip install ".[llm]"
+      - name: Report and push
+        env:
+          PORTFOLIO_YAML: ${{ secrets.PORTFOLIO_YAML }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          EMAIL_TO: ${{ secrets.EMAIL_TO }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        # --quiet keeps positions out of the (public) log; no artifacts are uploaded.
+        run: downside --notify --quiet ${{ secrets.ANTHROPIC_API_KEY != '' && '--brief' || '' }}
