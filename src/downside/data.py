@@ -30,8 +30,32 @@ RECENT = 30
 STALE_DAYS = 7
 
 
+CBOE = "https://cdn.cboe.com/api/global/us_indices/daily_prices/{s}_History.csv"
+IMPLIED = {"SPY": "VIX", "QQQ": "VXN"}  # tickers whose forecast uses a Cboe implied-volatility index
+
+
 class DataError(RuntimeError):
     pass
+
+
+def load_implied(cache: Path, fetch: bool = True) -> tuple[dict[str, pd.Series], list[str]]:
+    """{index name: daily close series} for VIX and VXN from Cboe's free history files, plus warnings.
+
+    A failed download is a warning, not an error: those tickers fall back to HAR-PK.
+    """
+    out, warnings = {}, []
+    cache.mkdir(parents=True, exist_ok=True)
+    for name in sorted(set(IMPLIED.values())):
+        path = cache / f"_{name}.csv"
+        try:
+            if fetch:
+                path.write_bytes(_get(CBOE.format(s=name)))
+            df = pd.read_csv(path)
+            df["DATE"] = pd.to_datetime(df["DATE"], format="%m/%d/%Y")
+            out[name] = df.set_index("DATE")["CLOSE"].astype(float).sort_index()
+        except (urllib.error.URLError, TimeoutError, OSError, KeyError, ValueError) as e:
+            warnings.append(f"{name} unavailable ({type(e).__name__}); using HAR-PK instead")
+    return out, warnings
 
 
 @dataclass
@@ -40,6 +64,11 @@ class Bars:
     frames: dict[str, pd.DataFrame]
     fetched: str
     warnings: list[str] = field(default_factory=list)
+    implied: dict[str, pd.Series] = field(default_factory=dict)   # by index name (VIX, VXN)
+
+    def implied_for(self, ticker: str) -> tuple[pd.Series | None, str]:
+        name = IMPLIED.get(ticker, "")
+        return self.implied.get(name), name
 
     def close(self, ticker: str) -> float:
         return float(self.frames[ticker].close.iloc[-1])
@@ -142,4 +171,5 @@ def load(tickers: list[str], cache: Path, fetch: bool = True, now: datetime | No
     problems, warnings = check(frames, now.date())
     if problems:
         raise DataError("bars rejected:\n  " + "\n  ".join(problems))
-    return Bars(frames, fetched, warnings)
+    implied, iv_warnings = ({}, []) if not set(IMPLIED) & set(frames) else load_implied(cache, fetch)
+    return Bars(frames, fetched, warnings + iv_warnings, implied)

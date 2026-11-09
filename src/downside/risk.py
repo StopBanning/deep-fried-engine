@@ -15,7 +15,7 @@ from scipy import stats
 from . import levered as LV
 from .data import Bars
 from .portfolio import Portfolio, Position
-from .vol import HORIZON, Forecast, correlation, forecast
+from .vol import HORIZON, Forecast, Record, correlation, forecast, track_record
 
 Z80, Z95 = stats.norm.ppf(0.9), stats.norm.ppf(0.975)
 STRESS_MOVES = (-0.10, -0.20, -0.30, -0.40, 0.10, 0.20)
@@ -73,6 +73,7 @@ class RangeRow:
     fc: Forecast
     r80: tuple[float, float]
     r95: tuple[float, float]
+    record: Record | None
 
 
 @dataclass
@@ -103,7 +104,11 @@ def odds(distance: float, sd: float) -> tuple[float, float]:
 
 def analyze(pf: Portfolio, bars: Bars) -> Analysis:
     f = bars.frames
-    fc = {t: forecast(f[t]) for t in pf.underlyings()}
+    fc, record = {}, {}
+    for t in pf.underlyings():
+        iv, name = bars.implied_for(t)
+        fc[t] = forecast(f[t], iv, name)
+        record[t] = track_record(f[t], iv)
 
     holdings = []
     for p in pf.positions:
@@ -167,7 +172,7 @@ def analyze(pf: Portfolio, bars: Bars) -> Analysis:
         last, sd = bars.close(t), fc[t].sd5
         ranges.append(RangeRow(t, last, fc[t],
                                tuple(last * np.exp(np.array([-1, 1]) * Z80 * sd)),
-                               tuple(last * np.exp(np.array([-1, 1]) * Z95 * sd))))
+                               tuple(last * np.exp(np.array([-1, 1]) * Z95 * sd)), record[t]))
 
     return Analysis(pf, str(bars.last_date()), holdings, book, cost, sum(h.day for h in holdings),
                     sum(expo.values()), week_sd, levels, stress, history, ranges, list(bars.warnings))

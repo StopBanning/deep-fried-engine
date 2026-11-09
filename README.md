@@ -28,6 +28,8 @@ retail portfolios get hurt by math nobody showed them.
   daily-reset fund at your leverage did over the same stretch (often 2 to 3 times worse).
 - **Next week's ranges and level odds:** calibrated volatility forecasts, 80/95% price ranges, and the
   chance of touching or closing beyond each level this week.
+- **Scorecard:** how often the model's own ranges held over the last 26 weeks, replayed with no look-ahead.
+  The tool grades itself in every report.
 - **Headlines:** the last 48 hours per ticker from Google News. There's an optional short brief
   written by Claude, which is rejected if it contains any number the headlines don't.
 
@@ -124,7 +126,13 @@ channel. Keep it that way if you change the workflow, or run it from a private f
 
 ## How the numbers are made
 
-- **Volatility.** Next week's variance comes from HAR-PK.
+- **Index ETFs.** SPY and QQQ use Cboe's VIX and VXN instead (free daily history files), rescaled the
+  same way. In the same test, implied volatility beat every model on those two ETFs, while HAR-PK won
+  across single stocks. If Cboe is unreachable they fall back to HAR-PK, and the report says so.
+- **Scorecard.** Every run replays the last 26 weekly forecasts per ticker, each made only with data
+  from its own day, and reports how often the week's move landed inside the 80% and 95% ranges. No
+  state is stored, so it works the same in CI. An honest 80% range holds about 80% of weeks.
+- **Volatility.** For everything else, next week's variance comes from HAR-PK.
   - It regresses the next 5 sessions' realized variance on the daily, weekly and monthly Parkinson range,
     fitted on the trailing 500 sessions.
   - The forecast is then rescaled by the model's own error over the last 52 weeks.

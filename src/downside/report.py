@@ -111,7 +111,21 @@ def render(a: Analysis, news: dict[str, list[Headline]] | None = None, brief: st
     for r in a.ranges:
         L.append(f"| {r.ticker} | {r.last:,.2f} | {r.fc.sd5:.2%} | {r.r80[0]:,.2f} to {r.r80[1]:,.2f} "
                  f"| {r.r95[0]:,.2f} to {r.r95[1]:,.2f} | {r.fc.method} |")
-    L.append("\nThe model doesn't know about earnings dates: ranges run too narrow in a week with a report.")
+    L.append("\nThe models don't know about earnings dates: ranges run too narrow in a week with a report.")
+
+    recs = [r for r in a.ranges if r.record]
+    if recs:
+        n = sum(r.record.weeks for r in recs)
+        p80 = sum(r.record.in80 * r.record.weeks for r in recs) / n
+        p95 = sum(r.record.in95 * r.record.weeks for r in recs) / n
+        L += ["", "## Scorecard",
+              "The same model replayed over recent weeks, each forecast made only with data from its own day. "
+              "An honest 80% range holds about 80% of weeks; much less means the ranges run too narrow.", "",
+              "| Ticker | Weeks | Inside 80% range | Inside 95% range | Last 95% miss |", "|---|---|---|---|---|"]
+        for r in recs:
+            L.append(f"| {r.ticker} | {r.record.weeks} | {r.record.in80:.0%} | {r.record.in95:.0%} "
+                     f"| {r.record.last_miss or 'none'} |")
+        L.append(f"| **All** | {n} | **{p80:.0%}** | **{p95:.0%}** | |")
 
     if brief:
         L += ["", "## News brief", brief]

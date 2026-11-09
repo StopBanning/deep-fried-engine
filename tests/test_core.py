@@ -146,3 +146,33 @@ def test_unsupported_numbers():
     src = "NVDA: Nvidia falls 9% as chip index drops 12.3% (Reuters)"
     assert llm.unsupported_numbers("Nvidia fell 9% and chips 12.3%.", src) == []
     assert llm.unsupported_numbers("Nvidia could fall to 150.", src) == ["150"]
+
+
+# --- implied volatility and the scorecard --------------------------------------------------------
+
+def test_implied_forecast_uses_the_index():
+    df = gbm_bars(31, n=1000, sigma_daily=0.015)
+    iv = pd.Series(0.015 * np.sqrt(252) * 100, index=df.index)  # an implied vol that matches the truth
+    fc = vol.forecast(df, iv, "VIX")
+    assert fc.method == "Implied (VIX)"
+    assert fc.sd5 == pytest.approx(0.015 * np.sqrt(5), rel=0.2)
+
+
+def test_implied_missing_falls_back_to_har():
+    df = gbm_bars(32, n=1000)
+    assert vol.forecast(df, None).method == "HAR-PK"
+    stale = pd.Series([20.0], index=[df.index[100]])  # ffilled, but k still computable
+    assert vol.forecast(df, stale, "VIX").method == "Implied (VIX)"
+
+
+def test_track_record_is_calibrated_on_gbm():
+    df = gbm_bars(33, n=1500, sigma_daily=0.02)
+    rec = vol.track_record(df, weeks=150)
+    assert rec.weeks >= 100
+    assert 0.68 <= rec.in80 <= 0.92
+    assert rec.in95 >= 0.88
+
+
+def test_scorecard_in_report(bars, raw_portfolio):
+    md = report.render(risk.analyze(portfolio.parse(raw_portfolio), bars))
+    assert "## Scorecard" in md and "| **All** |" in md
