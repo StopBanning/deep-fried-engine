@@ -1,4 +1,4 @@
-name: Daily Downside
+name: Deep Fried
 
 on:
   schedule:
@@ -47,4 +47,4 @@ jobs:
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         # --quiet keeps positions out of the (public) log; no artifacts are uploaded.
-        run: downside --notify --quiet ${{ secrets.ANTHROPIC_API_KEY != '' && '--brief' || '' }}
+        run: deepfried --notify --quiet ${{ secrets.ANTHROPIC_API_KEY != '' && '--brief' || '' }}

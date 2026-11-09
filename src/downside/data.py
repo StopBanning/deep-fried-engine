@@ -20,7 +20,7 @@ import pandas as pd
 
 URL = ("https://api.nasdaq.com/api/quote/{t}/historical?assetclass={a}"
        "&fromdate={d1}&todate={d2}&limit=9999")
-AGENT = "daily-downside/0.1 (personal research script)"  # Nasdaq drops agents that carry a URL
+AGENT = "deep-fried/0.1 (personal research script)"  # Nasdaq drops agents that carry a URL
 PRICES = ["open", "high", "low", "close"]
 COLS = PRICES + ["volume"]
 NY = ZoneInfo("America/New_York")

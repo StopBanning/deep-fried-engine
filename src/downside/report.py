@@ -41,7 +41,7 @@ def headline_numbers(a: Analysis) -> list[str]:
 
 def summary(a: Analysis) -> str:
     """A few lines for a phone notification."""
-    lines = [f"Daily Downside, {a.portfolio.name}, {a.as_of}"]
+    lines = [f"Deep Fried, {a.portfolio.name}, {a.as_of}"]
     lines += [s.replace("**", "") for s in headline_numbers(a)]
     late = [r for r in a.levels if r.kind == "exit_below" and r.loss_from_cost <= LATE_LINE]
     near = [r for r in a.levels if r.touch >= 0.5]
@@ -57,7 +57,7 @@ def summary(a: Analysis) -> str:
 
 def render(a: Analysis, news: dict[str, list[Headline]] | None = None, brief: str | None = None) -> str:
     pf = a.portfolio
-    L = [f"# Daily Downside: {pf.name}, close of {a.as_of}", ""]
+    L = [f"# Deep Fried: {pf.name}, close of {a.as_of}", ""]
     L += headline_numbers(a)
     if a.warnings:
         L += ["", "**Data warnings:** " + "; ".join(a.warnings) + "."]

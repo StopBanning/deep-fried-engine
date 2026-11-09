@@ -1,5 +1,5 @@
 [project]
-name = "daily-downside"
+name = "deep-fried-engine"
 version = "0.1.0"
 description = "A daily US stock report that leads with the downside: calibrated weekly ranges, level odds, and dollar stress tests that understand leveraged ETFs."
 readme = "README.md"
@@ -17,6 +17,7 @@ llm = ["anthropic"]
 dev = ["pytest>=8"]
 
 [project.scripts]
+deepfried = "downside.cli:main"
 downside = "downside.cli:main"
 
 [build-system]

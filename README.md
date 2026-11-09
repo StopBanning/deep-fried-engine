@@ -1,10 +1,13 @@
-# Daily Downside
+# Deep Fried Engine
 
-A daily report for a US stock portfolio that leads with what could go wrong.
+How fried could your portfolio get? A daily report for a US stock portfolio that leads with what could go wrong.
+
+This is the risk engine behind [**Deep Fried**](https://github.com/StopBanning/deep-fried), a US stock
+analysis dashboard. It also runs on its own as a command-line report.
 
 Most "AI stock analysis" tools ask a language model for a score, a buy/sell call and entry and exit
 prices. Those numbers read confidently, but no model stands behind them and nobody tracks how often
-they hold. Daily Downside does the opposite. Every number comes from code you can read, and the report
+they hold. Deep Fried does the opposite. Every number comes from code you can read, and the report
 is organized around the question a holder actually needs answered: **how much can I lose from here,
 and how fast?**
 
@@ -57,11 +60,11 @@ should land within ±$288; a 1-in-40 bad week costs about $441.
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/daily-downside && cd daily-downside
+git clone https://github.com/StopBanning/deep-fried-engine && cd deep-fried-engine
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 cp portfolio.example.yaml portfolio.yaml   # git-ignored: put your real positions here
-downside --portfolio portfolio.yaml
+deepfried --portfolio portfolio.yaml
 ```
 
 The report prints and is saved to `reports/<date>.md`. No API keys are needed: prices come from
@@ -103,7 +106,7 @@ against the fund's prospectus before relying on it.
 
 ## Push notifications
 
-`downside --notify` sends a short summary plus the full report as a file to every channel configured in
+`deepfried --notify` sends a short summary plus the full report as a file to every channel configured in
 the environment:
 
 | Channel  | Variables |
@@ -155,8 +158,8 @@ channel. Keep it that way if you change the workflow, or run it from a private f
 ## Credits
 
 The idea of a scheduled daily stock report pushed to your phone comes from
-[ZhuLinsen/daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis) (MIT). Daily
-Downside is a separate, US-only codebase built around risk numbers instead of model-written calls.
+[ZhuLinsen/daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis) (MIT). Deep
+Fried is a separate, US-only codebase built around risk numbers instead of model-written calls.
 
 ## Disclaimer
 

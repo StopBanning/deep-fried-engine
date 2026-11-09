@@ -52,7 +52,7 @@ def main(argv: list[str] | None = None) -> int:
         print(md)
     if args.notify:
         for line in notify.send_all(report.summary(analysis), md, path.name,
-                                    f"Daily Downside {analysis.as_of}") or ["no channels configured"]:
+                                    f"Deep Fried {analysis.as_of}") or ["no channels configured"]:
             say(line)
     return 0
 
