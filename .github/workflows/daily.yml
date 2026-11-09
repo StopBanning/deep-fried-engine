@@ -13,13 +13,28 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      - name: Need a portfolio
+        id: gate
+        env:
+          PORTFOLIO_YAML: ${{ secrets.PORTFOLIO_YAML }}
+        run: |
+          if [ -z "$PORTFOLIO_YAML" ]; then
+            echo "No PORTFOLIO_YAML secret set; skipping. See the README to set it up."
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/checkout@v4
+        if: steps.gate.outputs.run == 'true'
       - uses: actions/setup-python@v5
+        if: steps.gate.outputs.run == 'true'
         with:
           python-version: "3.13"
       - name: Install
+        if: steps.gate.outputs.run == 'true'
         run: pip install ".[llm]"
       - name: Report and push
+        if: steps.gate.outputs.run == 'true'
         env:
           PORTFOLIO_YAML: ${{ secrets.PORTFOLIO_YAML }}
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
