@@ -1,3 +1,5 @@
+> **Moved.** This engine now lives inside [**Deep Fried**](https://github.com/StopBanning/deep-fried) as [`downside/`](https://github.com/StopBanning/deep-fried/tree/us-edition/downside) (docs: [docs/engine.md](https://github.com/StopBanning/deep-fried/blob/us-edition/docs/engine.md)). This repository is archived.
+
 # Deep Fried Engine
 
 How fried could your portfolio get? A daily report for a US stock portfolio that leads with what could go wrong.
